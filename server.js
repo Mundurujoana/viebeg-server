@@ -42,6 +42,22 @@ const startServer = async () => {
     }
   });
 
+  app.get('/api/customers/:cust_id/transactions', async (req, res) => {
+    try {
+      const custId = req.params.cust_id;
+      const [rows] = await connection.query('SELECT * FROM Transactions WHERE cust_id = ?', [custId]);
+  
+      if (rows.length === 0) {
+        res.status(404).json({ error: 'No transactions found for this customer' });
+      } else {
+        res.json(rows);
+      }
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+  
   app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
