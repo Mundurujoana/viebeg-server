@@ -57,6 +57,41 @@ const startServer = async () => {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
+
+
+  app.get('/api/districts', async (req, res) => {
+    try {
+      const [rows] = await connection.query('SELECT location_district FROM Customers');
+      const districts = rows.map((row) => row.location_district);
+  
+      // Create an object to store district occurrences
+      const districtOccurrences = {};
+  
+      districts.forEach((district) => {
+        districtOccurrences[district] = (districtOccurrences[district] || 0) + 1;
+      });
+  
+      res.json(districtOccurrences);
+    } catch (error) {
+      console.error('Error fetching district data:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+  
+
+  app.get('/api/districts-names', async (req, res) => {
+    try {
+      const [rows] = await connection.query('SELECT DISTINCT location_district FROM Customers');
+      const districts = rows.map((row) => row.location_district);
+      res.json(districts);
+    } catch (error) {
+      console.error('Error fetching district data:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+
+  
   
   app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
