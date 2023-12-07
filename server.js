@@ -96,13 +96,17 @@ const startServer = async () => {
   app.get('/api/province-names', async (req, res) => {
     try {
       const [rows] = await connection.query('SELECT DISTINCT location_province FROM Customers');
-      const provinces = rows.map((row) => row.location_province);
+      
+      // Trim leading and trailing spaces from province names
+      const provinces = rows.map((row) => row.location_province.trim());
+      
       res.json(provinces);
     } catch (error) {
       console.error('Error fetching province data:', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
+  
 
   app.get('/api/sector-names', async (req, res) => {
     try {
