@@ -14,6 +14,8 @@ const startServer = async () => {
     database: process.env.DB_DATABASE,
   });
 
+
+
   app.use(cors()); // Enable CORS for all routes
 
   app.get('/api/customers', async (req, res) => {
@@ -86,6 +88,29 @@ const startServer = async () => {
       res.json(districts);
     } catch (error) {
       console.error('Error fetching district data:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+  
+  app.get('/api/province-names', async (req, res) => {
+    try {
+      const [rows] = await connection.query('SELECT DISTINCT location_province FROM Customers');
+      const provinces = rows.map((row) => row.location_province);
+      res.json(provinces);
+    } catch (error) {
+      console.error('Error fetching province data:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+  app.get('/api/sector-names', async (req, res) => {
+    try {
+      const [rows] = await connection.query('SELECT DISTINCT location_sector FROM Customers');
+      const sectors = rows.map((row) => row.location_sector);
+      res.json(sectors);
+    } catch (error) {
+      console.error('Error fetching sector data:', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
