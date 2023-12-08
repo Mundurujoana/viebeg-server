@@ -61,26 +61,78 @@ const startServer = async () => {
   });
 
 
-  app.get('/api/districts', async (req, res) => {
+
+ app.get('/api/province-occurrences', async (req, res) => {
+  try {
+    const [rows] = await connection.query('SELECT location_province FROM Customers');
+
+    // Filter out null values and extract province names
+    const provinces = rows.map((row) => row.location_province).filter(Boolean);
+
+    // Create an object to store province occurrences
+    const provinceOccurrences = {};
+
+    // Count the number of customers under each province
+    provinces.forEach((province) => {
+      provinceOccurrences[province] = (provinceOccurrences[province] || 0) + 1;
+    });
+
+    res.json(provinceOccurrences);
+  } catch (error) {
+    console.error('Error fetching province data:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+
+
+  app.get('/api/province-occurrences', async (req, res) => {
     try {
-      const [rows] = await connection.query('SELECT location_district FROM Customers');
-      const districts = rows.map((row) => row.location_district);
+      const [rows] = await connection.query('SELECT DISTINCT location_province FROM Customers');
   
-      // Create an object to store district occurrences
-      const districtOccurrences = {};
+      // Normalize province names by converting to lowercase and trimming spaces
+      const provinces = rows.map((row) => row.location_province);
   
-      districts.forEach((district) => {
-        districtOccurrences[district] = (districtOccurrences[district] || 0) + 1;
+      // Create an object to store province occurrences
+      const provinceOccurrences = {};
+  
+      provinces.forEach((province) => {
+        if (province) {
+          provinceOccurrences[province] = (provinceOccurrences[province] || 0) + 1;
+        }
       });
   
-      res.json(districtOccurrences);
+      res.json(provinceOccurrences);
     } catch (error) {
-      console.error('Error fetching district data:', error);
+      console.error('Error fetching province data:', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
+
+
+
+  // app.get('/api/districts', async (req, res) => {
+  //   try {
+  //     const [rows] = await connection.query('SELECT location_district FROM Customers');
+  //     const districts = rows.map((row) => row.location_district);
+  
+  //     // Create an object to store district occurrences
+  //     const districtOccurrences = {};
+  
+  //     districts.forEach((district) => {
+  //       districtOccurrences[district] = (districtOccurrences[district] || 0) + 1;
+  //     });
+  
+  //     res.json(districtOccurrences);
+  //   } catch (error) {
+  //     console.error('Error fetching district data:', error);
+  //     res.status(500).json({ error: 'Internal Server Error' });
+  //   }
+  // });
   
 
+  
   app.get('/api/districts-names', async (req, res) => {
     try {
       const [rows] = await connection.query('SELECT DISTINCT location_district FROM Customers');
@@ -92,27 +144,85 @@ const startServer = async () => {
     }
   });
 
-  
+
+
   app.get('/api/province-names', async (req, res) => {
     try {
+      // Update the location_province values to remove leading and trailing spaces
+      await connection.query('UPDATE Customers SET location_province = TRIM(location_province)');
+  
+      // Fetch the distinct province names after the update
       const [rows] = await connection.query('SELECT DISTINCT location_province FROM Customers');
-      
-      // Trim leading and trailing spaces from province names
-      const provinces = rows.map((row) => row.location_province.trim());
-      
+      const provinces = rows.map((row) => row.location_province);
+  
       res.json(provinces);
     } catch (error) {
       console.error('Error fetching province data:', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
+
   
+  
+//   app.get('/api/province-names', async (req, res) => {
+//     try {
+//         const [rows] = await connection.query('SELECT DISTINCT location_province FROM Customers');
+
+//         // Normalize province names by trimming spaces
+//         const provinces = rows.map((row) => (row.location_province ? row.location_province.trim() : null));
+
+//         // Filter out null values
+//         const uniqueProvincesSet = new Set(provinces);
+//         const uniqueProvinces = Array.from(uniqueProvincesSet);
+
+//         console.log('Province names:', uniqueProvinces);
+//         res.json(uniqueProvinces);
+//     } catch (error) {
+//         console.error('Error fetching province data:', error);
+//         res.status(500).json({ error: 'Internal Server Error' });
+//     }
+// });
+
+
+
+app.get('/api/province-names', async (req, res) => {
+  try {
+    // Update the location_province values to remove leading and trailing spaces
+    await connection.query('UPDATE Customers SET location_province = TRIM(location_province)');
+
+    // Fetch the distinct province names after the update
+    const [rows] = await connection.query('SELECT DISTINCT location_province FROM Customers');
+    const provinces = rows.map((row) => row.location_province);
+
+    res.json(provinces);
+  } catch (error) {
+    console.error('Error fetching province data:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+
+  
+  // app.get('/api/province-names', async (req, res) => {
+  //   try {
+  //     const [rows] = await connection.query('SELECT DISTINCT location_province FROM Customers');
+  //     const provinces = rows.map((row) => row.location_province.trim()); // Trim leading/trailing spaces
+  //     res.json(provinces);
+  //   } catch (error) {
+  //     console.error('Error fetching province data:', error);
+  //     res.status(500).json({ error: 'Internal Server Error' });
+  //   }
+  // });
+  
+
 
   app.get('/api/sector-names', async (req, res) => {
     try {
       const [rows] = await connection.query('SELECT DISTINCT location_sector FROM Customers');
       const sectors = rows.map((row) => row.location_sector);
       res.json(sectors);
+    
     } catch (error) {
       console.error('Error fetching sector data:', error);
       res.status(500).json({ error: 'Internal Server Error' });
