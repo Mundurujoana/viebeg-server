@@ -202,8 +202,6 @@ app.get('/api/province-names', async (req, res) => {
 });
 
 
-
-  
   // app.get('/api/province-names', async (req, res) => {
   //   try {
   //     const [rows] = await connection.query('SELECT DISTINCT location_province FROM Customers');
