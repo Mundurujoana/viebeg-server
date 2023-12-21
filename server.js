@@ -228,7 +228,55 @@ app.get('/api/province-names', async (req, res) => {
   });
 
 
+  app.get('/api/sectors', async (req, res) => {
+    try {
+      const [rows] = await connection.query('SELECT DISTINCT Sector FROM facilitiesfemi');
+      const sectors = rows.map((row) => row.Sector);
+      res.json(sectors);
+    } catch (error) {
+      console.error('Error fetching sector data:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
   
+
+  app.get('/api/facility-types', async (req, res) => {
+    try {
+      const [rows] = await connection.query('SELECT DISTINCT `FACILITY TYPE` FROM facilitiesfemi');
+      const facilityTypes = rows.map((row) => row['FACILITY TYPE']);
+      res.json(facilityTypes);
+    } catch (error) {
+      console.error('Error fetching facility types:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+  
+  app.get('/api/diseases', async (req, res) => {
+    try {
+      const [rows] = await connection.query('SELECT DISTINCT DISEASES FROM facilitiesfemi');
+      const diseases = rows.map((row) => row.DISEASES);
+      res.json(diseases);
+    } catch (error) {
+      console.error('Error fetching disease data:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+  
+  
+
+ app.get('/api/equipments', async (req, res) => {
+  try {
+    const [rows] = await connection.query('SELECT DISTINCT EQUIPMENT FROM facilitiesfemi');
+    const equipments = rows.map((row) => row.EQUIPMENT);
+    res.json(equipments);
+  } catch (error) {
+    console.error('Error fetching equipment data:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
   
   app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
