@@ -280,7 +280,7 @@ const port = process.env.PORT || 5000;
 
 app.get('/api/csv', async (req, res) => {
   const data = [];
-  fs.createReadStream(__dirname, 'data','facilities.csv')
+  fs.createReadStream('./data/facilities.csv')
     .pipe(csv())
     .on('data', (row) => {
       data.push(row);
