@@ -1,4 +1,5 @@
 const express = require('express');
+const { Sequelize, DataTypes } = require('sequelize');
 const mysql = require('mysql2/promise');
 const cors = require('cors');
 const csv = require('csv-parser');
@@ -8,17 +9,66 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
 
+const sequelize = new Sequelize('viebeg', 'root', 'Fy{~K/_"c#`b)7ef', {
+  host: '34.31.179.103',
+  dialect: 'mysql'
+});
+app.use(cors());
+
+sequelize.sync()
+  .then(() => {
+    console.log('Connected to MySQL database and synchronized models');
+  })
+  .catch(err => {
+    console.error('Error connecting to the database:', err);
+  });
+
+  app.get('/api/data', async (req, res) => {
+    try {
+      // Execute raw SQL queries to get counts for specified filters
+    //   const [cellCount, cellMetadata] = await sequelize.query("SELECT COUNT(DISTINCT Cell) AS cellCount FROM facilities WHERE District = 'Bugesera' AND Sector = 'Kanzenze' AND Cell = 'Kirerema'");
+    //   const [districtCount, districtMetadata] = await sequelize.query("SELECT 'HEALTH FACILITY', COUNT(DISTINCT District) AS districtCount FROM facilities");
+    //   const [districtData, districtMetadata] = await sequelize.query("SELECT 'HEALTH FACILITY', 'FACILITY TYPE', Latitude,Longitude, 'Number of Doctors','Number of Nurses', 'Patients_per_Month', COUNT(DISTINCT Sector) AS sectorCount FROM facilities WHERE District = 'Bugesera'");
+    const [districtData, districtMetadata] = await sequelize.query(`
+    SELECT COUNT(DISTINCT \`HEALTH FACILITY\`) as health_facilities, COUNT(DISTINCT \`FACILITY TYPE\`) as facility_type, COUNT(DISTINCT Sector) as sectors, COUNT(DISTINCT cell) as cell, COUNT(DISTINCT village) as villages
+    FROM facilities 
+    WHERE District = 'Bugesera'
+  `);
+    //   const [sectorCount, sectorMetadata] = await sequelize.query("SELECT COUNT(DISTINCT Sector) AS sectorCount FROM facilities WHERE District = 'Bugesera'");
+    //   const [cellCount, cellMetadata] = await sequelize.query("SELECT COUNT(DISTINCT cell) AS cellCount FROM facilities WHERE District = 'Bugesera' AND Sector='Nyamata'");
+    //   const [villageCount, villageMetadata] = await sequelize.query("SELECT COUNT(DISTINCT village) AS villageCount FROM facilities WHERE District = 'Bugesera' AND Sector='Nyamata' AND village='Bihari'");
+  
+      // Extract counts from the results
+    //   const numberOfCells = cellCount[0].cellCount;
+    // const numberOfSectors = sectorCount[0].sectorCount;
+    // const numberOfCell = cellCount[0];
+    // const numberOfVillageCount = villageCount[0].villageCount;
+    const districtData1 = districtData[0];
+      console.log(districtData1);
+  
+      // Send counts as JSON
+      res.json({ districtData1 });
+    } catch (error) {
+      console.error('Error retrieving facilities data:', error);
+      res.status(500).send('Internal Server Error');
+    }
+  });
+  
+
+// Start the server
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
+
 // const startServer = async () => {
-//   const connection = await mysql.createConnection({
-//     host: process.env.DB_HOST,
-//     user: process.env.DB_USER,
-//     password: process.env.DB_PASSWORD,
-//     database: process.env.DB_DATABASE,
-//   });
+  // const connection = await mysql.createConnection({
+  //   host: process.env.DB_HOST,
+  //   user: process.env.DB_USER,
+  //   password: process.env.DB_PASSWORD,
+  //   database: process.env.DB_DATABASE,
+  // });
 
-
-
-  app.use(cors()); // Enable CORS for all routes
+//   app.use(cors()); // Enable CORS for all routes
 
 //   app.get('/api/customers', async (req, res) => {
 //     try {
@@ -278,20 +328,21 @@ const port = process.env.PORT || 5000;
 //   }
 // });
 
-app.get('/api/csv', async (req, res) => {
-  const data = [];
-  fs.createReadStream('./data/facilities.csv')
-    .pipe(csv())
-    .on('data', (row) => {
-      data.push(row);
-    })
-    .on('end', () => {
-      res.json(data);
-    });
-});
-  app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-  });
+// app.get('/api/csv', async (req, res) => {
+//   const data = [];
+//   fs.createReadStream('./data/facilities.csv')
+//     .pipe(csv())
+//     .on('data', (row) => {
+//       data.push(row);
+//     })
+//     .on('end', () => {
+//       res.json(data);
+//     });
+// });
+
+// app.listen(port, () => {
+//   console.log(`Server is running on port ${port}`);
+// });
 // };
 
 // startServer();
