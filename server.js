@@ -1,4 +1,5 @@
 const express = require('express');
+const { Sequelize, DataTypes } = require('sequelize');
 const mysql = require('mysql2/promise');
 const cors = require('cors');
 require('dotenv').config();
@@ -16,9 +17,22 @@ const startServer = async () => {
     
   });
 
+//   app.use(cors()); // Enable CORS for all routes
 
+//   app.get('/api/customers', async (req, res) => {
+//     try {
+//       const [rows] = await connection.query('SELECT * FROM Customers');
+//       res.json(rows);
+//     } catch (error) {
+//       console.error('Error fetching customer data:', error);
+//       res.status(500).json({ error: 'Internal Server Error' });
+//     }
+//   });
 
-  app.use(cors()); // Enable CORS for all routes
+//   app.get('/api/customers/:cust_id/creditScore', async (req, res) => {
+//     try {
+//       const custId = req.params.cust_id;
+//       const [rows] = await connection.query('SELECT * FROM CreditScore WHERE cust_id = ?', [custId]);
 
   app.get('/api/customers', async (req, res) => {
     try {
@@ -114,24 +128,24 @@ const startServer = async () => {
 
 
 
-  // app.get('/api/districts', async (req, res) => {
-  //   try {
-  //     const [rows] = await connection.query('SELECT location_district FROM Customers');
-  //     const districts = rows.map((row) => row.location_district);
+//   app.get('/api/districts', async (req, res) => {
+//     try {
+//       const [rows] = await connection.query('SELECT location_district FROM Customers');
+//       const districts = rows.map((row) => row.location_district);
   
-  //     // Create an object to store district occurrences
-  //     const districtOccurrences = {};
+//       // Create an object to store district occurrences
+//       const districtOccurrences = {};
   
-  //     districts.forEach((district) => {
-  //       districtOccurrences[district] = (districtOccurrences[district] || 0) + 1;
-  //     });
+//       districts.forEach((district) => {
+//         districtOccurrences[district] = (districtOccurrences[district] || 0) + 1;
+//       });
   
-  //     res.json(districtOccurrences);
-  //   } catch (error) {
-  //     console.error('Error fetching district data:', error);
-  //     res.status(500).json({ error: 'Internal Server Error' });
-  //   }
-  // });
+//       res.json(districtOccurrences);
+//     } catch (error) {
+//       console.error('Error fetching district data:', error);
+//       res.status(500).json({ error: 'Internal Server Error' });
+//     }
+//   });
   
 
   
@@ -204,16 +218,16 @@ app.get('/api/province-names', async (req, res) => {
 });
 
 
-  // app.get('/api/province-names', async (req, res) => {
-  //   try {
-  //     const [rows] = await connection.query('SELECT DISTINCT location_province FROM Customers');
-  //     const provinces = rows.map((row) => row.location_province.trim()); // Trim leading/trailing spaces
-  //     res.json(provinces);
-  //   } catch (error) {
-  //     console.error('Error fetching province data:', error);
-  //     res.status(500).json({ error: 'Internal Server Error' });
-  //   }
-  // });
+//   app.get('/api/province-names', async (req, res) => {
+//     try {
+//       const [rows] = await connection.query('SELECT DISTINCT location_province FROM Customers');
+//       const provinces = rows.map((row) => row.location_province.trim()); // Trim leading/trailing spaces
+//       res.json(provinces);
+//     } catch (error) {
+//       console.error('Error fetching province data:', error);
+//       res.status(500).json({ error: 'Internal Server Error' });
+//     }
+//   });
   
 
 
@@ -297,4 +311,9 @@ app.get('/api/province-names', async (req, res) => {
   });
 };
 
-startServer();
+// app.listen(port, () => {
+//   console.log(`Server is running on port ${port}`);
+// });
+// };
+
+// startServer();
