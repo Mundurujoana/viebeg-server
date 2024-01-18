@@ -279,6 +279,18 @@ app.get('/api/province-names', async (req, res) => {
 });
 
 
+  const data = [];
+  fs.createReadStream('./data/diseases.csv', { highWaterMark: 1024 * 1024 }) // 1MB chunks
+    .pipe(csv())
+    .on('data', (row) => {
+      data.push(row);
+    })
+    .on('end', () => {
+      console.log(data);
+      res.json(data);
+    });
+
+ 
   
   app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
