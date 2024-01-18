@@ -1,38 +1,68 @@
 const express = require('express');
-const { Sequelize, DataTypes } = require('sequelize');
+const { Sequelize } = require('sequelize');
 const mysql = require('mysql2/promise');
 const cors = require('cors');
-require('dotenv').config();
+const dotenv = require('dotenv');
+const csv = require('csv-parser');
+const fs = require('fs');
+
+dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 5000;
 
-const startServer = async () => {
-  
+const createConnection = async () => {
   const connection = await mysql.createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE,
-    
   });
 
-//   app.use(cors()); // Enable CORS for all routes
+  return connection;
+};
 
-//   app.get('/api/customers', async (req, res) => {
-//     try {
-//       const [rows] = await connection.query('SELECT * FROM Customers');
-//       res.json(rows);
-//     } catch (error) {
-//       console.error('Error fetching customer data:', error);
-//       res.status(500).json({ error: 'Internal Server Error' });
-//     }
-//   });
+const createSequelize = () => {
+  return new Sequelize('viebeg', 'root', 'Fy{~K/_"c#`b)7ef', {
+    host: '34.31.179.103',
+    dialect: 'mysql'
+  });
+};
 
-//   app.get('/api/customers/:cust_id/creditScore', async (req, res) => {
-//     try {
-//       const custId = req.params.cust_id;
-//       const [rows] = await connection.query('SELECT * FROM CreditScore WHERE cust_id = ?', [custId]);
+const startServer = async () => {
+  const connection = await createConnection();
+  const sequelize = createSequelize();
+
+  try {
+    await sequelize.sync();
+    console.log('Connected to MySQL database and synchronized models');
+  } catch (error) {
+    console.error('Error connecting to the database:', error);
+  }
+
+  app.use(cors());
+
+  app.get('/api/data', async (req, res) => {
+    try {
+      const [districtData, districtMetadata] = await sequelize.query(`
+        SELECT COUNT(DISTINCT \`HEALTH FACILITY\`) as health_facilities,
+               COUNT(DISTINCT \`FACILITY TYPE\`) as facility_type,
+               COUNT(DISTINCT Sector) as sectors,
+               COUNT(DISTINCT cell) as cell,
+               COUNT(DISTINCT village) as villages
+        FROM facilities 
+        WHERE District = 'Bugesera'
+      `);
+
+      const districtData1 = districtData[0];
+      console.log(districtData1);
+
+      res.json({ districtData1 });
+    } catch (error) {
+      console.error('Error retrieving facilities data:', error);
+      res.status(500).send('Internal Server Error');
+    }
+  });
 
   app.get('/api/customers', async (req, res) => {
     try {
@@ -293,18 +323,6 @@ app.get('/api/province-names', async (req, res) => {
 });
 
 
-  const data = [];
-  fs.createReadStream('./data/diseases.csv', { highWaterMark: 1024 * 1024 }) // 1MB chunks
-    .pipe(csv())
-    .on('data', (row) => {
-      data.push(row);
-    })
-    .on('end', () => {
-      console.log(data);
-      res.json(data);
-    });
-
- 
   
   app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
@@ -316,4 +334,4 @@ app.get('/api/province-names', async (req, res) => {
 // });
 // };
 
-// startServer();
+startServer();
