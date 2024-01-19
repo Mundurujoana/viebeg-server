@@ -19,45 +19,38 @@ const createConnection = async () => {
     database: process.env.DB_DATABASE,
   });
 
-  return connection;
-};
-
-const createSequelize = () => {
-  return new Sequelize('viebeg', 'root', 'Fy{~K/_"c#`b)7ef', {
-    host: '34.31.179.103',
-    dialect: 'mysql'
-  });
-};
-
-const startServer = async () => {
-  const connection = await createConnection();
-  const sequelize = createSequelize();
-
-  try {
-    await sequelize.sync();
-    console.log('Connected to MySQL database and synchronized models');
-  } catch (error) {
-    console.error('Error connecting to the database:', error);
-  }
-
-  app.use(cors());
-
-  app.get('/api/data', async (req, res) => {
+  app.get('/api/data/:district', async (req, res) => {
     try {
-      const [districtData, districtMetadata] = await sequelize.query(`
-        SELECT COUNT(DISTINCT \`HEALTH FACILITY\`) as health_facilities,
-               COUNT(DISTINCT \`FACILITY TYPE\`) as facility_type,
-               COUNT(DISTINCT Sector) as sectors,
-               COUNT(DISTINCT cell) as cell,
-               COUNT(DISTINCT village) as villages
-        FROM facilities 
-        WHERE District = 'Bugesera'
-      `);
+      // Execute raw SQL queries to get counts for specified filters
+    //   const [cellCount, cellMetadata] = await sequelize.query("SELECT COUNT(DISTINCT Cell) AS cellCount FROM facilities WHERE District = 'Bugesera' AND Sector = 'Kanzenze' AND Cell = 'Kirerema'");
+    //   const [districtCount, districtMetadata] = await sequelize.query("SELECT 'HEALTH FACILITY', COUNT(DISTINCT District) AS districtCount FROM facilities");
+    //   const [districtData, districtMetadata] = await sequelize.query("SELECT 'HEALTH FACILITY', 'FACILITY TYPE', Latitude,Longitude, 'Number of Doctors','Number of Nurses', 'Patients_per_Month', COUNT(DISTINCT Sector) AS sectorCount FROM facilities WHERE District = 'Bugesera'");
+    const [districtData, districtMetadata] = await sequelize.query(`
+    SELECT COUNT(DISTINCT FacilityName) as health_facilities,
+           COUNT(DISTINCT FacilityType) as facility_type,
+           COUNT(DISTINCT Sector) as sectors,
+           COUNT(DISTINCT cell) as cell,
+           COUNT(DISTINCT village) as villages
+    FROM facilities 
+    WHERE District = :district
+`, {
+    replacements: { district: req.params.district },
+    type: sequelize.QueryTypes.SELECT
+});
 
-      const districtData1 = districtData[0];
-      console.log(districtData1);
-
-      res.json({ districtData1 });
+    //   const [sectorCount, sectorMetadata] = await sequelize.query("SELECT COUNT(DISTINCT Sector) AS sectorCount FROM facilities WHERE District = 'Bugesera'");
+    //   const [cellCount, cellMetadata] = await sequelize.query("SELECT COUNT(DISTINCT cell) AS cellCount FROM facilities WHERE District = 'Bugesera' AND Sector='Nyamata'");
+    //   const [villageCount, villageMetadata] = await sequelize.query("SELECT COUNT(DISTINCT village) AS villageCount FROM facilities WHERE District = 'Bugesera' AND Sector='Nyamata' AND village='Bihari'");
+  
+      // Extract counts from the results
+    //   const numberOfCells = cellCount[0].cellCount;
+    // const numberOfSectors = sectorCount[0].sectorCount;
+    // const numberOfCell = cellCount[0];
+    // const numberOfVillageCount = villageCount[0].villageCount;
+    // const districtData1 = districtData[0];
+      // Send counts as JSON
+      res.json({ districtData });
+    // console.log(districtData, "+++++++++++++++");
     } catch (error) {
       console.error('Error retrieving facilities data:', error);
       res.status(500).send('Internal Server Error');
