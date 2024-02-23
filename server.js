@@ -1,48 +1,34 @@
 const express = require('express');
-const { Sequelize } = require('sequelize');
 const mysql = require('mysql2/promise');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const csv = require('csv-parser');
-const fs = require('fs');
 
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 5000;
-
+const port = process.env.PORT || 4000;
 
 const createConnection = async () => {
   const connection = await mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_DATABASE,
+    host: '34.31.179.103',
+    user: 'root',
+    password: 'Fy{~K/_"c#`b)7ef',
+    database: 'viebeg',
   });
 
   return connection;
 };
 
-const createSequelize = () => {
-  return new Sequelize('viebeg', 'root', 'Fy{~K/_"c#`b)7ef', {
-    host: '34.31.179.103',
-    dialect: 'mysql'
-  });
-};
-
 const startServer = async () => {
   const connection = await createConnection();
-  const sequelize = createSequelize();
 
   try {
-    await sequelize.sync();
-    console.log('Connected to MySQL database and synchronized models');
+    console.log('Connected to MySQL database');
   } catch (error) {
     console.error('Error connecting to the database:', error);
   }
 
   app.use(cors());
-
   app.get('/api/data', async (req, res) => {
     try {
       const [districtData, districtMetadata] = await sequelize.query(`
@@ -314,16 +300,16 @@ app.get('/api/province-names', async (req, res) => {
   
   
 
- app.get('/api/equipments', async (req, res) => {
-  try {
-    const [rows] = await connection.query('SELECT DISTINCT EQUIPMENT FROM unnormalized_facilities_2');
-    const equipments = rows.map((row) => row.EQUIPMENT);
-    res.json(equipments);
-  } catch (error) {
-    console.error('Error fetching equipment data:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
+//  app.get('/api/equipments', async (req, res) => {
+//   try {
+//     const [rows] = await connection.query('SELECT DISTINCT EQUIPMENT FROM unnormalized_facilities_2');
+//     const equipments = rows.map((row) => row.EQUIPMENT);
+//     res.json(equipments);
+//   } catch (error) {
+//     console.error('Error fetching equipment data:', error);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// });
 
 
 app.get('/api/equipments', async (req, res) => {
